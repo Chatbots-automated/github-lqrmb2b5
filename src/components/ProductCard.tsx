@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, ShoppingCart, Eye, Target, Shield, X } from 'lucide-react';
+import { Heart, ShoppingCart, Eye, Target, Shield, X, Star, Clock, Award, Sparkles } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { Product } from '../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,8 +13,15 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [showQuickView, setShowQuickView] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const isWishlisted = wishlist.some((item) => item.id === product.id);
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('Image failed to load:', product.image);
+    setImageError(true);
+    e.currentTarget.src = '/elida-logo.svg';
+  };
 
   const handleAddToCart = () => {
     if (product.variants) {
@@ -40,9 +47,12 @@ export default function ProductCard({ product }: ProductCardProps) {
       >
         <div className="relative">
           <img 
-            src={product.image || 'https://via.placeholder.com/400x400?text=Produkto+nuotrauka'}
+            src={product.image}
             alt={product.name}
-            className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={handleImageError}
+            className={`w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105 ${
+              imageError ? 'object-contain p-4 bg-gray-50' : ''
+            }`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           
@@ -94,7 +104,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </motion.div>
 
-      {/* Quick View Modal */}
+      {/* Enhanced Quick View Modal */}
       <AnimatePresence>
         {showQuickView && (
           <>
@@ -109,105 +119,149 @@ export default function ProductCard({ product }: ProductCardProps) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
             >
-              <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+              <div className="bg-white rounded-2xl max-w-5xl w-full shadow-2xl relative overflow-hidden">
+                {/* Close button */}
                 <button
                   onClick={() => setShowQuickView(false)}
-                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
                 >
                   <X className="h-6 w-6 text-gray-500" />
                 </button>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-                  <div>
-                    <img
-                      src={product.image || 'https://via.placeholder.com/400x400?text=Produkto+nuotrauka'}
+
+                <div className="grid grid-cols-1 lg:grid-cols-2">
+                  {/* Image Section */}
+                  <div className="relative h-[500px] overflow-hidden bg-elida-cream">
+                    <motion.img
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      src={product.image}
                       alt={product.name}
-                      className="w-full h-auto rounded-lg shadow-lg"
+                      onError={handleImageError}
+                      className={`absolute inset-0 w-full h-full ${
+                        imageError ? 'object-contain p-16 bg-gray-50' : 'object-contain p-8'
+                      }`}
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
                   </div>
-                  
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
-                      <Shield className="h-6 w-6 text-elida-gold" />
-                      <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
-                    </div>
+
+                  {/* Content Section */}
+                  <div className="p-8 lg:p-12 relative">
+                    <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-32 h-32 bg-elida-gold/10 rounded-full blur-3xl" />
                     
-                    <p className="text-gray-600 mb-6">{product.description}</p>
-                    
-                    {product.features && (
+                    <div className="relative">
+                      {/* Header */}
                       <div className="mb-6">
-                        <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <Target className="h-4 w-4 text-elida-gold" />
-                          Savybės
-                        </h4>
-                        <ul className="space-y-2">
-                          {product.features.map((feature, index) => (
-                            <li key={index} className="text-sm text-gray-600 flex items-center">
-                              <span className="w-1.5 h-1.5 bg-elida-gold rounded-full mr-2" />
-                              {feature}
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="flex items-center gap-3 mb-4">
+                          <Shield className="h-7 w-7 text-elida-gold" />
+                          <h2 className="text-3xl font-playfair text-gray-900">{product.name}</h2>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            Pristatymas per 1-2 d.d.
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Award className="h-4 w-4" />
+                            Premium kokybė
+                          </span>
+                        </div>
                       </div>
-                    )}
 
-                    {product.variants && (
-                      <div className="space-y-4 mb-6">
-                        {product.variants.colors && (
-                          <div>
-                            <label className="text-sm font-medium text-gray-900 block mb-2">Spalva</label>
-                            <div className="flex gap-2">
-                              {product.variants.colors.map((color) => (
-                                <button
-                                  key={color}
-                                  onClick={() => setSelectedColor(color)}
-                                  className={`px-3 py-1 rounded-lg text-sm border ${
-                                    selectedColor === color
-                                      ? 'bg-elida-gold text-white border-elida-gold'
-                                      : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                                  } transition-colors`}
-                                >
-                                  {color}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {product.variants.sizes && (
-                          <div>
-                            <label className="text-sm font-medium text-gray-900 block mb-2">Dydis</label>
-                            <div className="flex gap-2">
-                              {product.variants.sizes.map((size) => (
-                                <button
-                                  key={size}
-                                  onClick={() => setSelectedSize(size)}
-                                  className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm border ${
-                                    selectedSize === size
-                                      ? 'bg-elida-gold text-white border-elida-gold'
-                                      : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                                  } transition-colors`}
-                                >
-                                  {size}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                      {/* Description */}
+                      <div className="mb-8">
+                        <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-elida-gold" />
+                          Apie produktą
+                        </h3>
+                        <p className="text-gray-600 leading-relaxed">
+                          {product.description}
+                        </p>
                       </div>
-                    )}
 
-                    <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-                      <span className="text-3xl font-bold text-elida-gold">{product.price.toFixed(2)}€</span>
-                      <button
-                        onClick={handleAddToCart}
-                        className="flex items-center gap-2 px-8 py-4 bg-elida-gold text-white rounded-lg hover:bg-elida-accent focus:ring-4 focus:ring-elida-gold/50 transition-colors duration-300 shadow-md font-medium"
-                      >
-                        <ShoppingCart className="h-5 w-5" />
-                        Į krepšelį
-                      </button>
+                      {/* Features */}
+                      {product.features && (
+                        <div className="mb-8">
+                          <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
+                            <Target className="h-5 w-5 text-elida-gold" />
+                            Savybės
+                          </h3>
+                          <ul className="grid grid-cols-2 gap-3">
+                            {product.features.map((feature, index) => (
+                              <li key={index} className="flex items-center gap-2 text-gray-600">
+                                <span className="w-1.5 h-1.5 bg-elida-gold rounded-full" />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Variants */}
+                      {product.variants && (
+                        <div className="space-y-6 mb-8">
+                          {product.variants.colors && (
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-900 mb-3">Spalva</h3>
+                              <div className="flex gap-3">
+                                {product.variants.colors.map((color) => (
+                                  <button
+                                    key={color}
+                                    onClick={() => setSelectedColor(color)}
+                                    className={`px-4 py-2 rounded-lg text-sm transition-all ${
+                                      selectedColor === color
+                                        ? 'bg-elida-gold text-white shadow-lg'
+                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                  >
+                                    {color}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {product.variants.sizes && (
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-900 mb-3">Dydis</h3>
+                              <div className="flex gap-3">
+                                {product.variants.sizes.map((size) => (
+                                  <button
+                                    key={size}
+                                    onClick={() => setSelectedSize(size)}
+                                    className={`w-12 h-12 rounded-lg flex items-center justify-center text-sm transition-all ${
+                                      selectedSize === size
+                                        ? 'bg-elida-gold text-white shadow-lg'
+                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                  >
+                                    {size}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Price and Action */}
+                      <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+                        <div>
+                          <span className="text-sm text-gray-500 mb-1 block">Kaina</span>
+                          <span className="text-3xl font-playfair text-elida-gold">
+                            {product.price.toFixed(2)}€
+                          </span>
+                        </div>
+                        <button
+                          onClick={handleAddToCart}
+                          className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-elida-gold to-elida-accent text-white rounded-lg hover:shadow-lg focus:ring-4 focus:ring-elida-gold/50 transition-all duration-300 font-medium relative overflow-hidden group"
+                        >
+                          <div className="absolute inset-0 shimmer pointer-events-none" />
+                          <ShoppingCart className="h-5 w-5 relative z-10" />
+                          <span className="relative z-10">Į krepšelį</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
