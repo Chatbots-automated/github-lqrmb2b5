@@ -18,6 +18,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const isWishlisted = wishlist.some((item) => item.id === product.id);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    if (!product.image || product.image === '/elida-logo.svg') return;
     console.error('Image failed to load:', product.image);
     setImageError(true);
     e.currentTarget.src = '/elida-logo.svg';
@@ -39,6 +40,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     });
   };
 
+  // Ensure price is a number and has toFixed method
+  const formattedPrice = typeof product.price === 'number' ? 
+    product.price.toFixed(2) : 
+    parseFloat(String(product.price)).toFixed(2);
+
   return (
     <>
       <motion.div
@@ -51,7 +57,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             alt={product.name}
             onError={handleImageError}
             className={`w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105 ${
-              imageError ? 'object-contain p-4 bg-gray-50' : ''
+              imageError || product.image === '/elida-logo.svg' ? 'object-contain p-4 bg-gray-50' : ''
             }`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -92,7 +98,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <p className="text-gray-600 text-sm mb-6 line-clamp-2">{product.description}</p>
 
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
-            <span className="text-2xl font-bold text-elida-gold">{product.price.toFixed(2)}€</span>
+            <span className="text-2xl font-bold text-elida-gold">{formattedPrice}€</span>
             <button 
               onClick={handleAddToCart}
               className="flex items-center gap-2 px-6 py-3 bg-elida-gold text-white font-medium rounded-lg hover:bg-elida-accent focus:ring-4 focus:ring-elida-gold/50 transition-colors duration-300 shadow-md"
@@ -140,7 +146,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                       alt={product.name}
                       onError={handleImageError}
                       className={`absolute inset-0 w-full h-full ${
-                        imageError ? 'object-contain p-16 bg-gray-50' : 'object-contain p-8'
+                        imageError || product.image === '/elida-logo.svg' ? 'object-contain p-16 bg-gray-50' : 'object-contain p-8'
                       }`}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
@@ -250,7 +256,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         <div>
                           <span className="text-sm text-gray-500 mb-1 block">Kaina</span>
                           <span className="text-3xl font-playfair text-elida-gold">
-                            {product.price.toFixed(2)}€
+                            {formattedPrice}€
                           </span>
                         </div>
                         <button
