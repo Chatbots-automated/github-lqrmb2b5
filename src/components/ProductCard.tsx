@@ -41,28 +41,30 @@ export default function ProductCard({ product }: ProductCardProps) {
     });
   };
 
-  // Split description into key points and usage instructions
-  const getDescriptionSections = () => {
+  // Split description into categories
+  const categorizeDescription = () => {
     const description = product.description;
-    const points = description.split('.').filter(Boolean).map(section => section.trim());
+    const points = description.split('.').filter(Boolean).map(point => point.trim());
     
-    // Split points into two categories
-    const keyPoints = points.filter(point => 
-      !point.toLowerCase().includes('naudojimas') && 
-      !point.toLowerCase().includes('įspėjimas') &&
-      !point.toLowerCase().includes('sudėtis')
-    );
-    
-    const usagePoints = points.filter(point => 
-      point.toLowerCase().includes('naudojimas') || 
-      point.toLowerCase().includes('įspėjimas') ||
-      point.toLowerCase().includes('sudėtis')
-    );
-
-    return { keyPoints, usagePoints };
+    return {
+      features: points.filter(point => 
+        !point.toLowerCase().includes('naudojimas:') &&
+        !point.toLowerCase().includes('įspėjimas:') &&
+        !point.toLowerCase().includes('sudėtis:')
+      ),
+      usage: points.filter(point => 
+        point.toLowerCase().includes('naudojimas:')
+      ),
+      warnings: points.filter(point => 
+        point.toLowerCase().includes('įspėjimas:')
+      ),
+      ingredients: points.filter(point => 
+        point.toLowerCase().includes('sudėtis:')
+      )
+    };
   };
 
-  const { keyPoints, usagePoints } = getDescriptionSections();
+  const { features, usage, warnings, ingredients } = categorizeDescription();
 
   // Ensure price is a number and has toFixed method
   const formattedPrice = typeof product.price === 'number' ? 
@@ -162,7 +164,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="text-sm font-medium text-gray-600">{product.category}</div>
           </div>
 
-          <p className="text-gray-600 text-sm mb-6 line-clamp-2">{product.description}</p>
+          <p className="text-gray-600 text-sm mb-6 line-clamp-2">{features[0]}</p>
 
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
             <span className="text-2xl font-bold text-elida-gold">{formattedPrice}€</span>
@@ -210,190 +212,209 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </motion.button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2">
-                  <div className="p-8 lg:p-12 relative bg-gradient-to-br from-elida-cream to-white">
-                    <div className="relative h-[400px] mb-8 flex items-center justify-center">
-                      <motion.img
-                        initial={{ scale: 1.1, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                        src={product.imageurl}
-                        alt={product.name}
-                        onError={handleImageError}
-                        className={`max-h-full max-w-full ${
-                          imageError || product.imageurl === '/elida-logo.svg' 
-                            ? 'object-contain p-8 bg-gray-50' 
-                            : 'object-contain'
-                        }`}
-                      />
-                    </div>
-
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="bg-white/50 backdrop-blur-sm rounded-xl p-6 border border-elida-gold/10"
-                    >
-                      <div className="flex items-center gap-2 mb-4">
-                        <Info className="h-5 w-5 text-elida-gold" />
-                        <h3 className="text-lg font-medium text-gray-900">Pagrindinė informacija</h3>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-gray-500 text-sm mb-1">Kategorija</p>
-                          <p className="font-medium text-gray-900">{product.category}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-500 text-sm mb-1">Kodas</p>
-                          <p className="font-medium text-gray-900">{product.sku}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <p className="text-gray-500 text-sm mb-1">Pristatymas</p>
-                          <p className="font-medium text-gray-900 flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-elida-gold" />
-                            1-2 darbo dienos
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
+                  <div className="lg:sticky lg:top-0 h-fit p-8 lg:p-12 bg-gradient-to-br from-elida-cream to-white">
+                    <motion.img
+                      initial={{ scale: 1.1, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                      src={product.imageurl}
+                      alt={product.name}
+                      onError={handleImageError}
+                      className={`w-full rounded-xl shadow-lg ${
+                        imageError || product.imageurl === '/elida-logo.svg' 
+                          ? 'object-contain p-8 bg-gray-50' 
+                          : 'object-cover'
+                      }`}
+                    />
                   </div>
 
                   <div className="p-8 lg:p-12 border-l border-gray-100">
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="mb-8"
-                    >
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-elida-gold/10 rounded-xl">
-                          <Shield className="h-7 w-7 text-elida-gold" />
-                        </div>
-                        <h2 className="text-3xl font-playfair text-gray-900">{product.name}</h2>
-                      </div>
-                    </motion.div>
-
-                    {keyPoints.length > 0 && (
+                    <div className="space-y-8">
+                      {/* Header */}
                       <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="mb-8"
+                        transition={{ delay: 0.2 }}
                       >
-                        <div className="flex items-center gap-2 mb-4">
-                          <Sparkles className="h-5 w-5 text-elida-gold" />
-                          <h3 className="text-lg font-medium text-gray-900">Savybės</h3>
-                        </div>
-                        <div className="space-y-3">
-                          {keyPoints.map((point, index) => (
-                            <div key={index} className="flex items-start gap-3 bg-gray-50 p-3 rounded-lg">
-                              <Star className="h-5 w-5 text-elida-gold flex-shrink-0 mt-0.5" />
-                              <p className="text-gray-600">{point}.</p>
-                            </div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {usagePoints.length > 0 && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="mb-8"
-                      >
-                        <div className="flex items-center gap-2 mb-4">
-                          <Package className="h-5 w-5 text-elida-gold" />
-                          <h3 className="text-lg font-medium text-gray-900">Naudojimo instrukcijos</h3>
-                        </div>
-                        <div className="space-y-3">
-                          {usagePoints.map((point, index) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <CheckCircle className="h-5 w-5 text-elida-gold flex-shrink-0 mt-0.5" />
-                              <p className="text-gray-600">{point}.</p>
-                            </div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {product.variants && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="space-y-6 mb-8"
-                      >
-                        {product.variants.colors && (
-                          <div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-3">Spalva</h3>
-                            <div className="flex gap-3">
-                              {product.variants.colors.map((color) => (
-                                <motion.button
-                                  key={color}
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => setSelectedColor(color)}
-                                  className={`px-4 py-2 rounded-xl text-sm transition-all ${
-                                    selectedColor === color
-                                      ? 'bg-elida-gold text-white shadow-lg'
-                                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                                  }`}
-                                >
-                                  {color}
-                                </motion.button>
-                              ))}
-                            </div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-elida-gold/10 rounded-xl">
+                            <Shield className="h-7 w-7 text-elida-gold" />
                           </div>
-                        )}
-
-                        {product.variants.sizes && (
-                          <div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-3">Dydis</h3>
-                            <div className="flex gap-3">
-                              {product.variants.sizes.map((size) => (
-                                <motion.button
-                                  key={size}
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  onClick={() => setSelectedSize(size)}
-                                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm transition-all ${
-                                    selectedSize === size
-                                      ? 'bg-elida-gold text-white shadow-lg'
-                                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                                  }`}
-                                >
-                                  {size}
-                                </motion.button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                          <h2 className="text-3xl font-playfair text-gray-900">{product.name}</h2>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Package className="h-5 w-5" />
+                          <span>{product.category}</span>
+                        </div>
                       </motion.div>
-                    )}
 
-                    <motion.div 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
-                      className="flex items-center justify-between pt-6 border-t border-gray-100"
-                    >
-                      <div>
-                        <span className="text-sm text-gray-500 mb-1 block">Kaina</span>
-                        <span className="text-3xl font-playfair text-elida-gold">
-                          {formattedPrice}€
-                        </span>
-                      </div>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleAddToCart}
-                        className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-elida-gold to-elida-accent text-white rounded-xl hover:shadow-lg focus:ring-4 focus:ring-elida-gold/50 transition-all duration-300 font-medium relative overflow-hidden group"
+                      {/* Features */}
+                      {features.length > 0 && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <div className="flex items-center gap-2 mb-4">
+                            <Sparkles className="h-5 w-5 text-elida-gold" />
+                            <h3 className="text-lg font-medium text-gray-900">Savybės</h3>
+                          </div>
+                          <div className="space-y-3">
+                            {features.map((feature, index) => (
+                              <div key={index} className="flex items-start gap-3 bg-gray-50 p-3 rounded-lg">
+                                <CheckCircle className="h-5 w-5 text-elida-gold flex-shrink-0 mt-0.5" />
+                                <p className="text-gray-600">{feature}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Usage Instructions */}
+                      {usage.length > 0 && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          <div className="flex items-center gap-2 mb-4">
+                            <Info className="h-5 w-5 text-elida-gold" />
+                            <h3 className="text-lg font-medium text-gray-900">Naudojimas</h3>
+                          </div>
+                          <div className="space-y-3">
+                            {usage.map((instruction, index) => (
+                              <div key={index} className="flex items-start gap-3">
+                                <Star className="h-5 w-5 text-elida-gold flex-shrink-0 mt-0.5" />
+                                <p className="text-gray-600">{instruction}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Warnings */}
+                      {warnings.length > 0 && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 }}
+                          className="bg-red-50 p-4 rounded-xl border border-red-100"
+                        >
+                          <div className="flex items-center gap-2 mb-4 text-red-600">
+                            <Info className="h-5 w-5" />
+                            <h3 className="text-lg font-medium">Įspėjimai</h3>
+                          </div>
+                          <div className="space-y-3">
+                            {warnings.map((warning, index) => (
+                              <div key={index} className="flex items-start gap-3">
+                                <Info className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                <p className="text-red-600">{warning}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Ingredients */}
+                      {ingredients.length > 0 && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.6 }}
+                        >
+                          <div className="flex items-center gap-2 mb-4">
+                            <Package className="h-5 w-5 text-elida-gold" />
+                            <h3 className="text-lg font-medium text-gray-900">Sudėtis</h3>
+                          </div>
+                          <div className="bg-gray-50 p-4 rounded-xl">
+                            {ingredients.map((ingredient, index) => (
+                              <p key={index} className="text-gray-600">{ingredient}</p>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Variants Selection */}
+                      {product.variants && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.7 }}
+                          className="space-y-6"
+                        >
+                          {product.variants.colors && (
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-900 mb-3">Spalva</h3>
+                              <div className="flex gap-3">
+                                {product.variants.colors.map((color) => (
+                                  <motion.button
+                                    key={color}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setSelectedColor(color)}
+                                    className={`px-4 py-2 rounded-xl text-sm transition-all ${
+                                      selectedColor === color
+                                        ? 'bg-elida-gold text-white shadow-lg'
+                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                  >
+                                    {color}
+                                  </motion.button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {product.variants.sizes && (
+                            <div>
+                              <h3 className="text-lg font-medium text-gray-900 mb-3">Dydis</h3>
+                              <div className="flex gap-3">
+                                {product.variants.sizes.map((size) => (
+                                  <motion.button
+                                    key={size}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setSelectedSize(size)}
+                                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm transition-all ${
+                                      selectedSize === size
+                                        ? 'bg-elida-gold text-white shadow-lg'
+                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                  >
+                                    {size}
+                                  </motion.button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+
+                      {/* Add to Cart Section */}
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.8 }}
+                        className="flex items-center justify-between pt-6 border-t border-gray-100"
                       >
-                        <div className="absolute inset-0 shimmer pointer-events-none" />
-                        <ShoppingCart className="h-5 w-5 relative z-10" />
-                        <span className="relative z-10">Į krepšelį</span>
-                      </motion.button>
-                    </motion.div>
+                        <div>
+                          <span className="text-sm text-gray-500 mb-1 block">Kaina</span>
+                          <span className="text-3xl font-playfair text-elida-gold">
+                            {formattedPrice}€
+                          </span>
+                        </div>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handleAddToCart}
+                          className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-elida-gold to-elida-accent text-white rounded-xl hover:shadow-lg focus:ring-4 focus:ring-elida-gold/50 transition-all duration-300 font-medium relative overflow-hidden group"
+                        >
+                          <div className="absolute inset-0 shimmer pointer-events-none" />
+                          <ShoppingCart className="h-5 w-5 relative z-10" />
+                          <span className="relative z-10">Į krepšelį</span>
+                        </motion.button>
+                      </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>
