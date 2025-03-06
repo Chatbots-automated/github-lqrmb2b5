@@ -5,7 +5,7 @@ export interface Product {
   description: string;
   price: number;
   sku: string;
-  image: string;
+  imageurl: string;  // Changed from 'image' to 'imageurl'
   variants?: {
     colors?: string[];
     sizes?: string[];

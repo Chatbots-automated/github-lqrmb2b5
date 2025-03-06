@@ -14,12 +14,13 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [showQuickView, setShowQuickView] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const isWishlisted = wishlist.some((item) => item.id === product.id);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    if (!product.image || product.image === '/elida-logo.svg') return;
-    console.error('Image failed to load:', product.image);
+    if (!product.imageurl || product.imageurl === '/elida-logo.svg') return;
+    console.error('Image failed to load:', product.imageurl);
     setImageError(true);
     e.currentTarget.src = '/elida-logo.svg';
   };
@@ -48,42 +49,88 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <>
       <motion.div
-        className="group relative bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-        whileHover={{ scale: 1.02 }}
+        className="group relative bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500"
+        whileHover={{ scale: 1.02, y: -5 }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        onClick={() => setShowQuickView(true)}
       >
-        <div className="relative">
-          <img 
-            src={product.image}
-            alt={product.name}
-            onError={handleImageError}
-            className={`w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105 ${
-              imageError || product.image === '/elida-logo.svg' ? 'object-contain p-4 bg-gray-50' : ''
-            }`}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="relative cursor-pointer">
+          <motion.div
+            className="relative w-full h-64 overflow-hidden"
+            animate={{ scale: isHovered ? 1.05 : 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <img 
+              src={product.imageurl}
+              alt={product.name}
+              onError={handleImageError}
+              className={`w-full h-full transition-all duration-500 ${
+                imageError || product.imageurl === '/elida-logo.svg' 
+                  ? 'object-contain p-4 bg-gray-50' 
+                  : 'object-cover'
+              }`}
+            />
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isHovered ? 1 : 0 }}
+              transition={{ duration: 0.3 }}
+            />
+          </motion.div>
           
           {/* Quick actions */}
-          <div className="absolute top-4 right-4 space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => toggleWishlist(product)}
-              className={`p-2 rounded-lg shadow-md ${
-                isWishlisted ? 'bg-elida-gold text-white' : 'bg-white/90 text-elida-gold'
-              } hover:scale-110 transition-transform backdrop-blur-sm`}
+          <motion.div 
+            className="absolute top-4 right-4 space-y-2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleWishlist(product);
+              }}
+              className={`p-3 rounded-xl shadow-lg ${
+                isWishlisted 
+                  ? 'bg-elida-gold text-white' 
+                  : 'bg-white/95 text-elida-gold hover:bg-elida-gold hover:text-white'
+              } backdrop-blur-sm transition-all duration-300`}
             >
               <Heart className="h-5 w-5" fill={isWishlisted ? 'currentColor' : 'none'} />
-            </button>
-            <button
-              onClick={() => setShowQuickView(true)}
-              className="p-2 rounded-lg bg-white/90 text-elida-gold shadow-md hover:scale-110 transition-transform backdrop-blur-sm"
-            >
-              <Eye className="h-5 w-5" />
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
           {/* SKU Badge */}
-          <div className="absolute top-4 left-4 px-3 py-1 bg-elida-gold/90 text-white rounded-lg text-xs font-mono tracking-wider backdrop-blur-sm">
+          <motion.div 
+            className="absolute top-4 left-4 px-4 py-2 bg-elida-gold/95 text-white rounded-xl text-xs font-mono tracking-wider backdrop-blur-sm shadow-lg"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : -20 }}
+            transition={{ duration: 0.3 }}
+          >
             {product.sku}
-          </div>
+          </motion.div>
+
+          {/* View Details Button */}
+          <motion.div
+            className="absolute bottom-4 left-4 right-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowQuickView(true);
+              }}
+              className="w-full px-6 py-3 bg-white/95 text-elida-gold rounded-xl font-medium backdrop-blur-sm shadow-lg hover:bg-elida-gold hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+            >
+              <Eye className="h-5 w-5" />
+              Peržiūrėti Detaliau
+            </button>
+          </motion.div>
         </div>
 
         <div className="p-6">
@@ -99,13 +146,18 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
             <span className="text-2xl font-bold text-elida-gold">{formattedPrice}€</span>
-            <button 
-              onClick={handleAddToCart}
-              className="flex items-center gap-2 px-6 py-3 bg-elida-gold text-white font-medium rounded-lg hover:bg-elida-accent focus:ring-4 focus:ring-elida-gold/50 transition-colors duration-300 shadow-md"
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart();
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-elida-gold to-elida-accent text-white font-medium rounded-xl hover:shadow-lg focus:ring-4 focus:ring-elida-gold/50 transition-all duration-300"
             >
               <ShoppingCart className="h-5 w-5" />
               Į krepšelį
-            </button>
+            </motion.button>
           </div>
         </div>
       </motion.div>
@@ -118,35 +170,41 @@ export default function ProductCard({ product }: ProductCardProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
               onClick={() => setShowQuickView(false)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
             >
               <div className="bg-white rounded-2xl max-w-5xl w-full shadow-2xl relative overflow-hidden">
                 {/* Close button */}
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => setShowQuickView(false)}
-                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-10"
+                  className="absolute top-4 right-4 p-2 bg-white/90 hover:bg-elida-gold hover:text-white rounded-xl transition-colors z-10 backdrop-blur-sm"
                 >
-                  <X className="h-6 w-6 text-gray-500" />
-                </button>
+                  <X className="h-6 w-6" />
+                </motion.button>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2">
                   {/* Image Section */}
-                  <div className="relative h-[500px] overflow-hidden bg-elida-cream">
+                  <div className="relative h-[500px] overflow-hidden bg-gradient-to-br from-elida-cream to-white">
                     <motion.img
-                      initial={{ scale: 1.1 }}
-                      animate={{ scale: 1 }}
-                      src={product.image}
+                      initial={{ scale: 1.1, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                      src={product.imageurl}
                       alt={product.name}
                       onError={handleImageError}
                       className={`absolute inset-0 w-full h-full ${
-                        imageError || product.image === '/elida-logo.svg' ? 'object-contain p-16 bg-gray-50' : 'object-contain p-8'
+                        imageError || product.imageurl === '/elida-logo.svg' 
+                          ? 'object-contain p-16 bg-gray-50' 
+                          : 'object-contain p-8'
                       }`}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
@@ -158,9 +216,16 @@ export default function ProductCard({ product }: ProductCardProps) {
                     
                     <div className="relative">
                       {/* Header */}
-                      <div className="mb-6">
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="mb-6"
+                      >
                         <div className="flex items-center gap-3 mb-4">
-                          <Shield className="h-7 w-7 text-elida-gold" />
+                          <div className="p-2 bg-elida-gold/10 rounded-xl">
+                            <Shield className="h-7 w-7 text-elida-gold" />
+                          </div>
                           <h2 className="text-3xl font-playfair text-gray-900">{product.name}</h2>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -173,10 +238,15 @@ export default function ProductCard({ product }: ProductCardProps) {
                             Premium kokybė
                           </span>
                         </div>
-                      </div>
+                      </motion.div>
 
                       {/* Description */}
-                      <div className="mb-8">
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="mb-8"
+                      >
                         <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
                           <Sparkles className="h-5 w-5 text-elida-gold" />
                           Apie produktą
@@ -184,45 +254,63 @@ export default function ProductCard({ product }: ProductCardProps) {
                         <p className="text-gray-600 leading-relaxed">
                           {product.description}
                         </p>
-                      </div>
+                      </motion.div>
 
                       {/* Features */}
                       {product.features && (
-                        <div className="mb-8">
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          className="mb-8"
+                        >
                           <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
                             <Target className="h-5 w-5 text-elida-gold" />
                             Savybės
                           </h3>
                           <ul className="grid grid-cols-2 gap-3">
                             {product.features.map((feature, index) => (
-                              <li key={index} className="flex items-center gap-2 text-gray-600">
+                              <motion.li 
+                                key={index}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.4 + index * 0.1 }}
+                                className="flex items-center gap-2 text-gray-600"
+                              >
                                 <span className="w-1.5 h-1.5 bg-elida-gold rounded-full" />
                                 {feature}
-                              </li>
+                              </motion.li>
                             ))}
                           </ul>
-                        </div>
+                        </motion.div>
                       )}
 
                       {/* Variants */}
                       {product.variants && (
-                        <div className="space-y-6 mb-8">
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 }}
+                          className="space-y-6 mb-8"
+                        >
                           {product.variants.colors && (
                             <div>
                               <h3 className="text-lg font-medium text-gray-900 mb-3">Spalva</h3>
                               <div className="flex gap-3">
                                 {product.variants.colors.map((color) => (
-                                  <button
+                                  <motion.button
                                     key={color}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                                     onClick={() => setSelectedColor(color)}
-                                    className={`px-4 py-2 rounded-lg text-sm transition-all ${
+                                    className={`px-4 py-2 rounded-xl text-sm transition-all ${
                                       selectedColor === color
                                         ? 'bg-elida-gold text-white shadow-lg'
                                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                                     }`}
                                   >
                                     {color}
-                                  </button>
+                                  </motion.button>
                                 ))}
                               </div>
                             </div>
@@ -233,41 +321,50 @@ export default function ProductCard({ product }: ProductCardProps) {
                               <h3 className="text-lg font-medium text-gray-900 mb-3">Dydis</h3>
                               <div className="flex gap-3">
                                 {product.variants.sizes.map((size) => (
-                                  <button
+                                  <motion.button
                                     key={size}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                                     onClick={() => setSelectedSize(size)}
-                                    className={`w-12 h-12 rounded-lg flex items-center justify-center text-sm transition-all ${
+                                    className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm transition-all ${
                                       selectedSize === size
                                         ? 'bg-elida-gold text-white shadow-lg'
                                         : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                                     }`}
                                   >
                                     {size}
-                                  </button>
+                                  </motion.button>
                                 ))}
                               </div>
                             </div>
                           )}
-                        </div>
+                        </motion.div>
                       )}
 
                       {/* Price and Action */}
-                      <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="flex items-center justify-between pt-6 border-t border-gray-100"
+                      >
                         <div>
                           <span className="text-sm text-gray-500 mb-1 block">Kaina</span>
                           <span className="text-3xl font-playfair text-elida-gold">
                             {formattedPrice}€
                           </span>
                         </div>
-                        <button
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
                           onClick={handleAddToCart}
-                          className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-elida-gold to-elida-accent text-white rounded-lg hover:shadow-lg focus:ring-4 focus:ring-elida-gold/50 transition-all duration-300 font-medium relative overflow-hidden group"
+                          className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-elida-gold to-elida-accent text-white rounded-xl hover:shadow-lg focus:ring-4 focus:ring-elida-gold/50 transition-all duration-300 font-medium relative overflow-hidden group"
                         >
                           <div className="absolute inset-0 shimmer pointer-events-none" />
                           <ShoppingCart className="h-5 w-5 relative z-10" />
                           <span className="relative z-10">Į krepšelį</span>
-                        </button>
-                      </div>
+                        </motion.button>
+                      </motion.div>
                     </div>
                   </div>
                 </div>

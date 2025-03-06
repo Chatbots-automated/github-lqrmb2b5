@@ -7,7 +7,7 @@ const COLLECTION_NAME = 'products';
 // Default product image if none is provided
 const DEFAULT_PRODUCT_IMAGE = '/elida-logo.svg';
 
-// Helper function to ensure price is a number and image exists
+// Helper function to ensure price is a number and imageurl exists
 const normalizeProduct = (data: any): Product => {
   return {
     id: data.id,
@@ -16,7 +16,7 @@ const normalizeProduct = (data: any): Product => {
     description: data.description || '',
     price: typeof data.price === 'number' ? data.price : parseFloat(data.price) || 0,
     sku: data.sku || '',
-    image: data.image || DEFAULT_PRODUCT_IMAGE,
+    imageurl: data.imageurl || DEFAULT_PRODUCT_IMAGE,
     variants: data.variants || undefined,
     features: data.features || undefined
   };
