@@ -54,7 +54,7 @@ export default function SignIn() {
         await signIn(email, password);
       }
       navigate('/profile');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Authentication error:', err);
       setError(isSignUp 
         ? 'Nepavyko sukurti paskyros. Bandykite dar kartą.' 
@@ -70,10 +70,14 @@ export default function SignIn() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      navigate('/profile');
-    } catch (err) {
+      // Don't navigate here - let the AuthContext handle navigation after redirect
+    } catch (err: any) {
       console.error('Google sign in error:', err);
-      setError('Nepavyko prisijungti su Google. Bandykite dar kartą.');
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Šis domenas nėra autorizuotas autentifikacijai. Prašome susisiekti su administratoriumi.');
+      } else if (err.code !== 'auth/popup-blocked') {
+        setError('Nepavyko prisijungti su Google. Bandykite dar kartą.');
+      }
     } finally {
       setLoading(false);
     }

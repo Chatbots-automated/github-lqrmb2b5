@@ -7,6 +7,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   sendPasswordResetEmail,
   updateProfile
 } from 'firebase/auth';
@@ -36,8 +38,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
+    // Check for redirect result on mount
+    getRedirectResult(auth).then((result) => {
+      if (result?.user) {
+        handleGoogleAuthSuccess(result.user);
+      }
+    }).catch((error) => {
+      if (error.code !== 'auth/unauthorized-domain') {
+        console.error('Redirect sign-in error:', error);
+      }
+    });
+
     return unsubscribe;
   }, []);
+
+  const handleGoogleAuthSuccess = async (user: User) => {
+    try {
+      // Create/update user profile in Firestore
+      await setDoc(doc(db, 'userprofiles', user.uid), {
+        email: user.email,
+        name: user.displayName,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
@@ -46,7 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
-    // Create user profile in Firestore
     await setDoc(doc(db, 'userprofiles', userCredential.user.uid), {
       email,
       createdAt: new Date().toISOString()
@@ -55,14 +80,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    
-    // Create/update user profile in Firestore
-    await setDoc(doc(db, 'userprofiles', result.user.uid), {
-      email: result.user.email,
-      name: result.user.displayName,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+
+    try {
+      // First try popup
+      const result = await signInWithPopup(auth, provider);
+      await handleGoogleAuthSuccess(result.user);
+    } catch (error: any) {
+      if (error.code === 'auth/popup-blocked') {
+        // If popup is blocked, fallback to redirect
+        await signInWithRedirect(auth, provider);
+      } else if (error.code === 'auth/unauthorized-domain') {
+        throw new Error('This domain is not authorized for authentication. Please contact support.');
+      } else {
+        throw error;
+      }
+    }
   };
 
   const resetPassword = async (email: string) => {

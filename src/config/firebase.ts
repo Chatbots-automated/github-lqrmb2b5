@@ -1,7 +1,12 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, connectAuthEmulator, GoogleAuthProvider } from "firebase/auth";
+import { 
+  getFirestore, 
+  connectFirestoreEmulator, 
+  enableMultiTabIndexedDbPersistence,
+  enableIndexedDbPersistence 
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBmBmiy1so69bAngcCfpIsMoe_ik9tE4no",
@@ -18,3 +23,39 @@ export const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Enable offline persistence
+if (typeof window !== 'undefined') {
+  try {
+    enableMultiTabIndexedDbPersistence(db).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        // Multiple tabs open, only enable in one tab
+        enableIndexedDbPersistence(db).catch((err) => {
+          console.error('Error enabling persistence:', err);
+        });
+      } else if (err.code === 'unimplemented') {
+        console.warn('Browser does not support persistence');
+      }
+    });
+  } catch (err) {
+    console.error('Error initializing persistence:', err);
+  }
+}
+
+// Connect to emulators in development
+if (import.meta.env.DEV) {
+  try {
+    connectAuthEmulator(auth, "http://localhost:9099");
+    connectFirestoreEmulator(db, "localhost", 8080);
+  } catch (err) {
+    console.warn('Error connecting to emulators:', err);
+  }
+}
+
+// Configure additional auth providers
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({
+  prompt: 'select_account'
+});
+
+export { provider as googleAuthProvider };
