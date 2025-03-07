@@ -199,11 +199,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
               onClick={() => setShowQuickView(false)}
             >
               <div 
-                className="relative w-full max-w-5xl bg-black/95 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl"
+                className="relative w-full max-w-5xl bg-black/95 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
                 onClick={e => e.stopPropagation()}
               >
                 <motion.button
@@ -215,8 +215,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                   <X className="h-6 w-6" />
                 </motion.button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                  <div className="lg:sticky lg:top-0 h-fit p-8 lg:p-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 h-full overflow-hidden">
+                  <div className="p-8 lg:p-12">
                     <motion.img
                       initial={{ scale: 1.1, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -224,7 +224,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                       src={product.imageurl}
                       alt={product.name}
                       onError={handleImageError}
-                      className={`w-full h-[600px] rounded-xl shadow-lg ${
+                      className={`w-full h-[500px] rounded-xl shadow-lg ${
                         imageError || product.imageurl === '/elida-logo.svg' 
                           ? 'object-contain p-8 bg-white/5' 
                           : 'object-cover'
@@ -232,7 +232,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     />
                   </div>
 
-                  <div className="p-8 lg:p-12 border-l border-white/10">
+                  <div className="p-8 lg:p-12 border-l border-white/10 overflow-y-auto">
                     <div className="space-y-8">
                       <motion.div 
                         initial={{ opacity: 0, y: 20 }}
@@ -259,7 +259,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         >
                           <div className="flex items-center gap-2 mb-4">
                             <Sparkles className="h-5 w-5 text-amber-500" />
-                            <h3 className="text-lg font-medium text-white">Features</h3>
+                            <h3 className="text-lg font-medium text-white">Savybės</h3>
                           </div>
                           <div className="space-y-3">
                             {features.map((feature, index) => (
@@ -280,7 +280,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         >
                           <div className="flex items-center gap-2 mb-4">
                             <Info className="h-5 w-5 text-amber-500" />
-                            <h3 className="text-lg font-medium text-white">Usage</h3>
+                            <h3 className="text-lg font-medium text-white">Naudojimas</h3>
                           </div>
                           <div className="space-y-3">
                             {usage.map((instruction, index) => (
@@ -302,7 +302,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         >
                           <div className="flex items-center gap-2 mb-4 text-red-400">
                             <Info className="h-5 w-5" />
-                            <h3 className="text-lg font-medium">Warnings</h3>
+                            <h3 className="text-lg font-medium">Įspėjimai</h3>
                           </div>
                           <div className="space-y-3">
                             {warnings.map((warning, index) => (
@@ -323,7 +323,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         >
                           <div className="flex items-center gap-2 mb-4">
                             <Package className="h-5 w-5 text-amber-500" />
-                            <h3 className="text-lg font-medium text-white">Ingredients</h3>
+                            <h3 className="text-lg font-medium text-white">Sudėtis</h3>
                           </div>
                           <div className="bg-white/5 p-4 rounded-xl">
                             {ingredients.map((ingredient, index) => (
@@ -342,7 +342,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         >
                           {product.variants.colors && (
                             <div>
-                              <h3 className="text-lg font-medium text-white mb-3">Color</h3>
+                              <h3 className="text-lg font-medium text-white mb-3">Spalva</h3>
                               <div className="flex gap-3">
                                 {product.variants.colors.map((color) => (
                                   <motion.button
@@ -365,7 +365,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                           {product.variants.sizes && (
                             <div>
-                              <h3 className="text-lg font-medium text-white mb-3">Size</h3>
+                              <h3 className="text-lg font-medium text-white mb-3">Dydis</h3>
                               <div className="flex gap-3">
                                 {product.variants.sizes.map((size) => (
                                   <motion.button
@@ -427,7 +427,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                    transition-all duration-300 flex items-center justify-center gap-2"
                         >
                           <ShoppingCart className="h-5 w-5" />
-                          Add to Cart
+                          Į krepšelį
                         </motion.button>
 
                         <motion.button
@@ -437,7 +437,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                           className="w-full py-4 bg-white/10 text-white rounded-xl 
                                    hover:bg-white/20 transition-all duration-300"
                         >
-                          Continue Shopping
+                          Tęsti apsipirkimą
                         </motion.button>
                       </motion.div>
                     </div>
