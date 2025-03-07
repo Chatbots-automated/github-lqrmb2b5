@@ -4,15 +4,23 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
+  updateProfile
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth, db } from '../config/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updateUserProfile: (displayName: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -36,7 +44,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    
+    // Create user profile in Firestore
+    await setDoc(doc(db, 'userprofiles', userCredential.user.uid), {
+      email,
+      createdAt: new Date().toISOString()
+    });
+  };
+
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    
+    // Create/update user profile in Firestore
+    await setDoc(doc(db, 'userprofiles', result.user.uid), {
+      email: result.user.email,
+      name: result.user.displayName,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  };
+
+  const resetPassword = async (email: string) => {
+    await sendPasswordResetEmail(auth, email);
+  };
+
+  const updateUserProfile = async (displayName: string) => {
+    if (!auth.currentUser) return;
+    
+    await updateProfile(auth.currentUser, { displayName });
+    await setDoc(doc(db, 'userprofiles', auth.currentUser.uid), {
+      name: displayName,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
   };
 
   const logout = async () => {
@@ -44,7 +84,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, logout }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      signIn,
+      signUp,
+      signInWithGoogle,
+      resetPassword,
+      updateUserProfile,
+      logout
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );

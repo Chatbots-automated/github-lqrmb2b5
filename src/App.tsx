@@ -15,6 +15,8 @@ import TermsAndConditions from './pages/TermsAndConditions';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Contact from './pages/Contact';
 import Checkout from './pages/Checkout';
+import UserProfile from './pages/UserProfile';
+import PasswordReset from './pages/PasswordReset';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -46,6 +48,8 @@ function App() {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/profile" element={<UserProfile />} />
+              <Route path="/password-reset" element={<PasswordReset />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </AnimatePresence>
