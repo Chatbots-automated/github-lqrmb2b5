@@ -1,9 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth, connectAuthEmulator, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { 
   getFirestore, 
-  connectFirestoreEmulator, 
   enableMultiTabIndexedDbPersistence,
   enableIndexedDbPersistence 
 } from "firebase/firestore";
@@ -39,16 +38,6 @@ if (typeof window !== 'undefined') {
     });
   } catch (err) {
     console.error('Error initializing persistence:', err);
-  }
-}
-
-// Connect to emulators in development
-if (import.meta.env.DEV) {
-  try {
-    connectAuthEmulator(auth, "http://localhost:9099");
-    connectFirestoreEmulator(db, "localhost", 8080);
-  } catch (err) {
-    console.warn('Error connecting to emulators:', err);
   }
 }
 
