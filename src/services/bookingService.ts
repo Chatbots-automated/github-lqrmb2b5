@@ -167,6 +167,7 @@ export const createBooking = async (bookingData: Omit<Booking, 'id' | 'createdAt
   try {
     const now = new Date().toISOString();
 
+    // Create the booking document in Firestore
     const bookingRef = await addDoc(collection(db, 'bookings'), {
       ...bookingData,
       createdAt: now,
@@ -174,6 +175,7 @@ export const createBooking = async (bookingData: Omit<Booking, 'id' | 'createdAt
       status: 'confirmed',
     });
 
+    // Update Google Calendar via webhook
     const webhookUrl = WEBHOOK_URLS[bookingData.cabin as keyof typeof WEBHOOK_URLS];
     if (webhookUrl) {
       await fetch(webhookUrl, {
@@ -214,12 +216,14 @@ export const getUserBookings = async (userId: string) => {
 
 export const cancelBooking = async (bookingId: string, cabinId: string) => {
   try {
+    // Update booking status in Firestore
     const bookingRef = doc(db, 'bookings', bookingId);
     await updateDoc(bookingRef, {
       status: 'cancelled',
       updatedAt: new Date().toISOString(),
     });
 
+    // Remove event from Google Calendar via webhook
     const webhookUrl = WEBHOOK_URLS[cabinId as keyof typeof WEBHOOK_URLS];
     if (webhookUrl) {
       await fetch(webhookUrl, {

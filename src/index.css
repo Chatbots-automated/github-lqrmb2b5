@@ -1,11 +1,11 @@
-@import '@fontsource/cormorant-garamond/300.css';
-@import '@fontsource/cormorant-garamond/400.css';
-@import '@fontsource/cormorant-garamond/500.css';
-@import '@fontsource/cormorant-garamond/600.css';
-@import '@fontsource/montserrat/200.css';
-@import '@fontsource/montserrat/300.css';
-@import '@fontsource/montserrat/400.css';
-@import '@fontsource/montserrat/500.css';
+@import '@fontsource/playfair-display/300.css';
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/500.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/poppins/200.css';
+@import '@fontsource/poppins/300.css';
+@import '@fontsource/poppins/400.css';
+@import '@fontsource/poppins/500.css';
 
 @tailwind base;
 @tailwind components;
@@ -17,26 +17,26 @@
   }
 
   body {
-    @apply bg-elida-cream text-gray-900 antialiased font-montserrat font-light;
+    @apply bg-elida-cream text-gray-900 antialiased font-poppins font-light;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-cormorant font-light tracking-wide;
+    @apply font-playfair font-light tracking-wide;
   }
 }
 
 @layer components {
   .btn-primary {
     @apply px-8 py-3.5 bg-gradient-to-r from-elida-gold to-elida-accent text-white rounded-full 
-           font-montserrat font-light tracking-wider hover:shadow-lg transform hover:scale-105 transition-all duration-300;
+           font-poppins font-light tracking-wider hover:shadow-lg transform hover:scale-105 transition-all duration-300;
   }
 
   .section-title {
-    @apply font-cormorant text-4xl md:text-5xl text-gray-900 mb-6 leading-tight font-light tracking-wide;
+    @apply font-playfair text-4xl md:text-5xl text-gray-900 mb-6 leading-tight font-light tracking-wide;
   }
 
   .section-subtitle {
-    @apply text-xl text-gray-600 mb-10 leading-relaxed font-montserrat font-light tracking-wide;
+    @apply text-xl text-gray-600 mb-10 leading-relaxed font-poppins font-light tracking-wide;
   }
   
   .luxury-card {
@@ -47,12 +47,12 @@
   .luxury-input {
     @apply w-full px-5 py-3.5 rounded-xl bg-white/50 border border-gray-100 
            focus:ring-2 focus:ring-elida-gold focus:border-transparent
-           placeholder-gray-400 transition-all duration-300 font-montserrat font-light;
+           placeholder-gray-400 transition-all duration-300 font-poppins font-light;
   }
   
   .luxury-button {
     @apply px-10 py-4 bg-gradient-to-r from-elida-gold to-elida-accent text-white rounded-full 
-           font-montserrat font-light tracking-wider shadow-md hover:shadow-xl transform 
+           font-poppins font-light tracking-wider shadow-md hover:shadow-xl transform 
            hover:scale-105 transition-all duration-300;
   }
 }
