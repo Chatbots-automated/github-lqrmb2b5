@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, LogIn, LogOut, ExternalLink } from 'lucide-react';
+import { Menu, X, LogIn, LogOut, ExternalLink, UserCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -101,9 +101,21 @@ export default function Navbar() {
             </a>
             {user ? (
               <div className="flex items-center gap-4">
-                <span className={`text-sm ${(isScrolled || !isHomePage) ? 'text-gray-600' : 'text-gray-200'}`}>
-                  {user.email}
-                </span>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    to="/profile"
+                    className={`flex items-center gap-2 p-2 rounded-full transition-all duration-300 ${
+                      (isScrolled || !isHomePage) 
+                        ? 'text-gray-600 hover:text-elida-gold' 
+                        : 'text-gray-200 hover:text-white'
+                    }`}
+                  >
+                    <UserCircle2 className="h-6 w-6" />
+                  </Link>
+                </motion.div>
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(212, 175, 55, 0.3)" }}
                   whileTap={{ scale: 0.95 }}
@@ -211,9 +223,15 @@ export default function Navbar() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: (navLinks.length + 1) * 0.1 + 0.2 }}
-                    className="px-3 py-2 text-sm text-gray-600"
                   >
-                    {user.email}
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-elida-gold hover:bg-gray-50"
+                    >
+                      <UserCircle2 className="h-5 w-5" />
+                      Mano Profilis
+                    </Link>
                   </motion.div>
                   <motion.button
                     initial={{ opacity: 0, x: -20 }}
