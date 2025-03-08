@@ -18,8 +18,8 @@ export default {
         }
       },
       fontFamily: {
-        'playfair': ['"Playfair Display"', 'serif'],
-        'poppins': ['Poppins', 'sans-serif']
+        'cormorant': ['"Cormorant Garamond"', 'serif'],
+        'montserrat': ['Montserrat', 'sans-serif']
       },
       animation: {
         'gradient': 'gradient 8s linear infinite',
